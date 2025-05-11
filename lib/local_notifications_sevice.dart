@@ -1,12 +1,36 @@
+import 'dart:async';
+import 'dart:developer';
+
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/timezone.dart' as tz;
 
+import 'main.dart';
+
 class LocalNotificationsService {
   static FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
+  // static StreamController<NotificationResponse> streamController =
+  //     StreamController();
 
-  static onTap(NotificationResponse notificationResponse) {}
+  static onTap(NotificationResponse notificationResponse) {
+
+   // log(notificationResponse.id!.toString());
+   // log(notificationResponse.payload!.toString());
+   // streamController.add(notificationResponse);
+
+
+    // hast5dm y3m el routes bdl el lft el stream el fshla d el stream d 3shan
+    // 7gat tnya api w firebase w kda
+    // h3ml bs navigatorKey f el main global w ageb beh el context
+    final id = notificationResponse.id;
+    if (id == 0) {
+      // استخدم navigatorKey للانتقال للصفحة المناسبة
+      navigatorKey.currentState?.pushNamed('basicView');
+    }else if (id == 2) {
+      navigatorKey.currentState?.pushNamed('scheduleView');
+    }
+  }
 
   static Future<void> init() async {
     InitializationSettings settings = const InitializationSettings(
@@ -20,16 +44,17 @@ class LocalNotificationsService {
   // basic notification
   //يعرض إشعار عادي بدون أزرار أو جدولة.
   static Future<void> showBasicNotification() async {
-    const AndroidNotificationDetails androidDetails =
-        AndroidNotificationDetails(
+    AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
       'basic_channel_id', // يجب أن يكون ID ثابت ومميز
       'Basic Notifications',
       channelDescription: 'This channel is for basic notifications',
       importance: Importance.max,
       priority: Priority.high,
+      sound: RawResourceAndroidNotificationSound(
+          'notifications.wav'.split('.').first),
     );
 
-    const NotificationDetails notificationDetails = NotificationDetails(
+    NotificationDetails notificationDetails = NotificationDetails(
       android: androidDetails,
     );
 
@@ -38,6 +63,7 @@ class LocalNotificationsService {
       'basic Title',
       'This is a test Basic notification.',
       notificationDetails,
+      payload: 'Basic Notification',
     );
   }
 
@@ -81,13 +107,13 @@ class LocalNotificationsService {
     final String currentTimeZone = await FlutterTimezone.getLocalTimezone();
 
     // 🟢 اطبع المنطقة (المكان) هنا
-    print("📍 التوقيت المحلي الحالي: $currentTimeZone");
+    log("📍 التوقيت المحلي الحالي: $currentTimeZone");
 
     tz.setLocalLocation(tz.getLocation(currentTimeZone));
 
     final scheduledTime =
-        tz.TZDateTime.now(tz.local).add(const Duration(seconds: 20));
-    print("⏰ سيتم إرسال الإشعار في: $scheduledTime");
+        tz.TZDateTime.now(tz.local).add(const Duration(seconds: 5));
+    log("⏰ سيتم إرسال الإشعار في: $scheduledTime");
 
     const AndroidNotificationDetails androidDetails =
         AndroidNotificationDetails(
@@ -109,14 +135,8 @@ class LocalNotificationsService {
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       scheduledTime,
       notificationDetails,
+      payload: 'Scheduled Notification',
     );
-    await flutterLocalNotificationsPlugin.zonedSchedule(
-        2,
-        'Scheduled Title!',
-        'This is a test Schedule notification.',
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        scheduledTime,
-        notificationDetails);
   }
 
   static Future<void> showDailyMorningNotification() async {
@@ -133,7 +153,7 @@ class LocalNotificationsService {
       scheduledDate = scheduledDate.add(const Duration(days: 1));
     }
 
-    print("⏰ سيتم إرسال الإشعار يوميًا الساعة 9 صباحًا في: $scheduledDate");
+    log("⏰ سيتم إرسال الإشعار يوميًا الساعة 9 صباحًا في: $scheduledDate");
 
     const AndroidNotificationDetails androidDetails =
         AndroidNotificationDetails(
