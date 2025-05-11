@@ -88,7 +88,7 @@ class LocalNotificationsService {
     const details = NotificationDetails(android: androidDetails);
 
     await flutterLocalNotificationsPlugin.zonedSchedule(
-      2,
+      1,
       'Repeating Title',
       'This repeats every minute',
       next,

@@ -1,7 +1,7 @@
-
 import 'package:flutter/material.dart';
 import 'package:notifications/basic_notification_view.dart';
 import 'package:notifications/schedule_notification_view.dart';
+import 'package:notifications/work_manger_service.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:timezone/data/latest.dart' as tz;
 
@@ -9,13 +9,18 @@ import 'local_notifications_sevice.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  tz.initializeTimeZones();
-  await LocalNotificationsService.init();
-  if (await Permission.notification.isDenied) {
-    await Permission.notification.request();
-  }
+  void main() async {
+    WidgetsFlutterBinding.ensureInitialized();
+    tz.initializeTimeZones();
+    // await Future.wait([
+    //   LocalNotificationsService.init(),
+    //   WorkManagerService().init(),
+    // ]);
+    await LocalNotificationsService.init();
+    await WorkManagerService().init();
+     if (await Permission.notification.isDenied) {
+      await Permission.notification.request();
+    }
 
   runApp(const MyApp());
 }
@@ -40,7 +45,7 @@ class MyApp extends StatelessWidget {
         'scheduleView': (context) => const ScheduleNotificationView(),
         'homeView': (context) => const HomeView(),
       },
-     initialRoute: 'homeView',
+      initialRoute: 'homeView',
     );
   }
 }
@@ -163,6 +168,14 @@ class _HomeViewState extends State<HomeView> {
               ),
             ),
           ),
+          const SizedBox(
+            height: 20,
+          ),
+          const Text(
+            'فكرني اشعمل اعمل showNotificationsWithActions',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+          )
         ],
       ),
     );
