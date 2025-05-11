@@ -1,4 +1,5 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 class LocalNotificationsService {
@@ -77,11 +78,20 @@ class LocalNotificationsService {
   //
   // scheduleMode يسمح للتنفيذ حتى لو الهاتف في وضع "Doze"
   static Future<void> showScheduleNotification() async {
+    final String currentTimeZone = await FlutterTimezone.getLocalTimezone();
+
+    // 🟢 اطبع المنطقة (المكان) هنا
+    print("📍 التوقيت المحلي الحالي: $currentTimeZone");
+
+    tz.setLocalLocation(tz.getLocation(currentTimeZone));
+
     final scheduledTime =
-        tz.TZDateTime.now(tz.local).add(const Duration(seconds: 10));
+        tz.TZDateTime.now(tz.local).add(const Duration(seconds: 20));
+    print("⏰ سيتم إرسال الإشعار في: $scheduledTime");
+
     const AndroidNotificationDetails androidDetails =
         AndroidNotificationDetails(
-      'schedule_channel_id', // يجب أن يكون ID ثابت ومميز
+      'schedule_channel_id',
       'Schedule Notifications',
       channelDescription: 'This channel is for Schedule notifications',
       importance: Importance.max,
@@ -93,6 +103,14 @@ class LocalNotificationsService {
     );
 
     await flutterLocalNotificationsPlugin.zonedSchedule(
+      2,
+      'Scheduled Title!',
+      'This is a test Schedule notification.',
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      scheduledTime,
+      notificationDetails,
+    );
+    await flutterLocalNotificationsPlugin.zonedSchedule(
         2,
         'Scheduled Title!',
         'This is a test Schedule notification.',
@@ -101,7 +119,51 @@ class LocalNotificationsService {
         notificationDetails);
   }
 
+  static Future<void> showDailyMorningNotification() async {
+    final String currentTimeZone = await FlutterTimezone.getLocalTimezone();
+    tz.setLocalLocation(tz.getLocation(currentTimeZone));
+
+    // تحديد الوقت اليوم الساعة 9 صباحًا
+    final now = tz.TZDateTime.now(tz.local);
+    var scheduledDate =
+        tz.TZDateTime(tz.local, now.year, now.month, now.day, 3, 5);
+
+    // لو عدّى الوقت الحالي الساعة 9، يبقى ابعته بكرة
+    if (scheduledDate.isBefore(now)) {
+      scheduledDate = scheduledDate.add(const Duration(days: 1));
+    }
+
+    print("⏰ سيتم إرسال الإشعار يوميًا الساعة 9 صباحًا في: $scheduledDate");
+
+    const AndroidNotificationDetails androidDetails =
+        AndroidNotificationDetails(
+      'daily_morning_channel_id',
+      'Daily Morning Notifications',
+      channelDescription: 'This channel is for daily morning notifications',
+      importance: Importance.max,
+      priority: Priority.high,
+    );
+
+    const NotificationDetails notificationDetails = NotificationDetails(
+      android: androidDetails,
+    );
+
+    await flutterLocalNotificationsPlugin.zonedSchedule(
+      3, // ID فريد
+      'صباح الخير!',
+      'ابدأ يومك بنشاط 💪',
+      scheduledDate,
+      notificationDetails,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      matchDateTimeComponents: DateTimeComponents.time, // التكرار يوميًا
+    );
+  }
+
   static Future<void> cancelNotification(int id) async {
     await flutterLocalNotificationsPlugin.cancel(id);
+  }
+
+  static Future<void> cancelAllNotification(int id) async {
+    await flutterLocalNotificationsPlugin.cancelAll();
   }
 }

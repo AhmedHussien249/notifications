@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:timezone/data/latest.dart' as tz;
 
-import 'local_notifications_sevice.dart';
 
+import 'local_notifications_sevice.dart';
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+FlutterLocalNotificationsPlugin();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   tz.initializeTimeZones();
@@ -85,6 +88,21 @@ class HomeView extends StatelessWidget {
               LocalNotificationsService.showScheduleNotification();
             },
             title: const Text('ScheduleNotification'),
+            leading: const Icon(Icons.notifications),
+            trailing: IconButton(
+              onPressed: () {
+                LocalNotificationsService.cancelNotification(2);
+              },
+              icon: const Icon(
+                Icons.cancel,
+                color: Colors.red,
+              ),
+            ),
+          ), ListTile(
+            onTap: () {
+              LocalNotificationsService.showDailyMorningNotification();
+            },
+            title: const Text('daily morning Notification'),
             leading: const Icon(Icons.notifications),
             trailing: IconButton(
               onPressed: () {
