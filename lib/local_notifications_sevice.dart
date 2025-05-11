@@ -27,8 +27,10 @@ class LocalNotificationsService {
     if (id == 0) {
       // استخدم navigatorKey للانتقال للصفحة المناسبة
       navigatorKey.currentState?.pushNamed('basicView');
+      log(notificationResponse.id!.toString());
     }else if (id == 2) {
       navigatorKey.currentState?.pushNamed('scheduleView');
+      log(notificationResponse.payload!.toString());
     }
   }
 
