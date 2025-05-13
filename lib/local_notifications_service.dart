@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
+import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
 import 'main.dart';
@@ -10,15 +11,14 @@ import 'main.dart';
 class LocalNotificationsService {
   static FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
+
   // static StreamController<NotificationResponse> streamController =
   //     StreamController();
 
   static onTap(NotificationResponse notificationResponse) {
-
-   // log(notificationResponse.id!.toString());
-   // log(notificationResponse.payload!.toString());
-   // streamController.add(notificationResponse);
-
+    // log(notificationResponse.id!.toString());
+    // log(notificationResponse.payload!.toString());
+    // streamController.add(notificationResponse);
 
     // hast5dm y3m el routes bdl el lft el stream el fshla d el stream d 3shan
     // 7gat tnya api w firebase w kda
@@ -28,7 +28,7 @@ class LocalNotificationsService {
       // استخدم navigatorKey للانتقال للصفحة المناسبة
       navigatorKey.currentState?.pushNamed('basicView');
       log(notificationResponse.id!.toString());
-    }else if (id == 2) {
+    } else if (id == 2) {
       navigatorKey.currentState?.pushNamed('scheduleView');
       log(notificationResponse.payload!.toString());
     }
@@ -74,6 +74,8 @@ class LocalNotificationsService {
   // يجدول إشعار يظهر كل دقيقة.
   // يستخدم matchDateTimeComponents: DateTimeComponents.time لتكرار الوقت.
   static Future<void> showRepeatedNotification() async {
+    tz.initializeTimeZones();
+
     final now = tz.TZDateTime.now(tz.local);
     final next = now
         .add(const Duration(minutes: 1))
@@ -106,6 +108,8 @@ class LocalNotificationsService {
   //
   // scheduleMode يسمح للتنفيذ حتى لو الهاتف في وضع "Doze"
   static Future<void> showScheduleNotification() async {
+    tz.initializeTimeZones();
+
     final String currentTimeZone = await FlutterTimezone.getLocalTimezone();
 
     // 🟢 اطبع المنطقة (المكان) هنا
@@ -142,42 +146,106 @@ class LocalNotificationsService {
   }
 
   static Future<void> showDailyMorningNotification() async {
+    AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+      'morning_channel_id', // يجب أن يكون ID ثابت ومميز
+      'Basic Notifications',
+      channelDescription: 'This channel is for basic notifications',
+      importance: Importance.max,
+      priority: Priority.high,
+      sound: RawResourceAndroidNotificationSound(
+          'notifications.wav'.split('.').first),
+    );
+
+    NotificationDetails notificationDetails = NotificationDetails(
+      android: androidDetails,
+    );
+    tz.initializeTimeZones();
+
     final String currentTimeZone = await FlutterTimezone.getLocalTimezone();
     tz.setLocalLocation(tz.getLocation(currentTimeZone));
 
     // تحديد الوقت اليوم الساعة 9 صباحًا
     final now = tz.TZDateTime.now(tz.local);
     var scheduledDate =
-        tz.TZDateTime(tz.local, now.year, now.month, now.day, 3, 5);
+        tz.TZDateTime(tz.local, now.year, now.month, now.day, 9);
 
-    // لو عدّى الوقت الحالي الساعة 9، يبقى ابعته بكرة
+    //لو عدّى الوقت الحالي الساعة 9، يبقى ابعته بكرة
     if (scheduledDate.isBefore(now)) {
       scheduledDate = scheduledDate.add(const Duration(days: 1));
     }
 
     log("⏰ سيتم إرسال الإشعار يوميًا الساعة 9 صباحًا في: $scheduledDate");
 
-    const AndroidNotificationDetails androidDetails =
-        AndroidNotificationDetails(
-      'daily_morning_channel_id',
-      'Daily Morning Notifications',
-      channelDescription: 'This channel is for daily morning notifications',
-      importance: Importance.max,
-      priority: Priority.high,
-    );
-
-    const NotificationDetails notificationDetails = NotificationDetails(
-      android: androidDetails,
-    );
-
     await flutterLocalNotificationsPlugin.zonedSchedule(
       3, // ID فريد
-      'صباح الخير!',
-      'ابدأ يومك بنشاط 💪',
+      'good morning!',
+      'start your day with a cup of coffee',
       scheduledDate,
       notificationDetails,
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      matchDateTimeComponents: DateTimeComponents.time, // التكرار يوميًا
+      // التكرار يوميًا
+    );
+  }
+
+  static Future<void> showDailyNotification() async {
+    AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+      'daily_channel_id', // يجب أن يكون ID ثابت ومميز
+      'daily Notifications',
+      channelDescription: 'This channel is for basic notifications',
+      importance: Importance.max,
+      priority: Priority.high,
+      sound: RawResourceAndroidNotificationSound(
+          'notifications.wav'.split('.').first),
+    );
+
+    NotificationDetails notificationDetails = NotificationDetails(
+      android: androidDetails,
+    );
+    tz.initializeTimeZones();
+
+     tz.setLocalLocation(tz.getLocation('Africa/Cairo'));
+    log(tz.local.toString());
+    var currentTime = tz.TZDateTime.now(tz.local);
+    log(currentTime.toString());
+    log("currentTime.year:${currentTime.year}");
+    log("currentTime.month:${currentTime.month}");
+    log("currentTime.day:${currentTime.day}");
+    log("currentTime.hour:${currentTime.hour}");
+    log("currentTime.minute:${currentTime.minute}");
+    log("currentTime.second:${currentTime.second}");
+    var scheduledDate = tz.TZDateTime(
+      tz.local,
+      currentTime.year,
+      currentTime.month,
+      currentTime.day,
+      9,
+
+    );
+    log("scheduledTime.year:${scheduledDate.year}");
+    log("scheduledTime.month:${scheduledDate.month}");
+    log("scheduledTime.day:${scheduledDate.day}");
+    log("scheduledTime.hour:${scheduledDate.hour}");
+    log("scheduledTime.minute:${scheduledDate.minute}");
+    log("scheduledTime.second:${scheduledDate.second}");
+    if (scheduledDate.isBefore(currentTime)) {
+ scheduledDate = scheduledDate.add(const Duration(days: 1));
+ }
+    log("After Added scheduledTime.year:${scheduledDate.year}");
+    log("After Added scheduledTime.month:${scheduledDate.month}");
+    log("After Added scheduledTime.day:${scheduledDate.day}");
+    log("After Added scheduledTime.hour:${scheduledDate.hour}");
+    log("After Added scheduledTime.minute:${scheduledDate.minute}");
+    log("After Added scheduledTime.second:${scheduledDate.second}");
+    log('Added Duration to scheduled time');
+    await flutterLocalNotificationsPlugin.zonedSchedule(
+      5,
+      'Daily Notification',
+      'This is a test daily notification',
+      scheduledDate,
+      payload: 'zonedSchedule',
+      notificationDetails,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      // matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
     );
   }
 
@@ -189,3 +257,8 @@ class LocalNotificationsService {
     await flutterLocalNotificationsPlugin.cancelAll();
   }
 }
+// tz.setLocalLocation(tz.getLocation('Africa/Cairo'));
+//
+// if (scheduledDate.isBefore(currentTime)) {
+// scheduledDate = scheduledDate.add(const Duration(minutes: 11));
+// }

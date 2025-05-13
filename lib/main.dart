@@ -1,26 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:notifications/basic_notification_view.dart';
 import 'package:notifications/schedule_notification_view.dart';
-import 'package:notifications/work_manger_service.dart';
+import 'package:notifications/work_manager_service.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:timezone/data/latest.dart' as tz;
 
-import 'local_notifications_sevice.dart';
+import 'local_notifications_service.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
-  void main() async {
-    WidgetsFlutterBinding.ensureInitialized();
-    tz.initializeTimeZones();
-    // await Future.wait([
-    //   LocalNotificationsService.init(),
-    //   WorkManagerService().init(),
-    // ]);
-    await LocalNotificationsService.init();
-    await WorkManagerService().init();
-     if (await Permission.notification.isDenied) {
-      await Permission.notification.request();
-    }
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Future.wait([
+    LocalNotificationsService.init(),
+
+
+  ]);
+ // await LocalNotificationsService.init();
+ // await WorkManagerService().init();
+  if (await Permission.notification.isDenied) {
+    await Permission.notification.request();
+  }
 
   runApp(const MyApp());
 }
@@ -58,40 +57,17 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
-  // @override
-  // void initState() {
-  //   // TODO: implement initState
-  //   super.initState();
-  //   listenToStreamNotification();
-  // }
 
-  // void listenToStreamNotification() {
-  //   LocalNotificationsService.streamController.stream.listen(
-  //     (notificationResponse) {
-  //       log(notificationResponse.id!.toString());
-  //       log(notificationResponse.payload!.toString());
-  //       if (notificationResponse.id == 0) {
-  //         Navigator.push(
-  //           context,
-  //           MaterialPageRoute(
-  //             builder: (context) => const BasicNotificationView(),
-  //           ),
-  //         );
-  //       } else if (notificationResponse.id == 2) {
-  //         Navigator.push(
-  //           context,
-  //           MaterialPageRoute(
-  //             builder: (context) => const ScheduleNotificationView(),
-  //           ),
-  //         );
-  //       }
-  //     },
-  //   );
-  // }
+@override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+     _initWorkManager();
+  }
 
-  // kol d mlosh lzma ela f 7alat mo3yna zy el api w firebase lakn ana hst5dm
-  // el routes 3shan ageb el context w ht7k feha b navigatorKey
-
+void _initWorkManager() async {
+  await WorkManagerService().init();
+}
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -181,3 +157,37 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 }
+
+// @override
+// void initState() {
+//   // TODO: implement initState
+//   super.initState();
+//   listenToStreamNotification();
+// }
+
+// void listenToStreamNotification() {
+//   LocalNotificationsService.streamController.stream.listen(
+//     (notificationResponse) {
+//       log(notificationResponse.id!.toString());
+//       log(notificationResponse.payload!.toString());
+//       if (notificationResponse.id == 0) {
+//         Navigator.push(
+//           context,
+//           MaterialPageRoute(
+//             builder: (context) => const BasicNotificationView(),
+//           ),
+//         );
+//       } else if (notificationResponse.id == 2) {
+//         Navigator.push(
+//           context,
+//           MaterialPageRoute(
+//             builder: (context) => const ScheduleNotificationView(),
+//           ),
+//         );
+//       }
+//     },
+//   );
+// }
+
+// kol d mlosh lzma ela f 7alat mo3yna zy el api w firebase lakn ana hst5dm
+// el routes 3shan ageb el context w ht7k feha b navigatorKey

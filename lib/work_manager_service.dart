@@ -1,6 +1,6 @@
 import 'package:workmanager/workmanager.dart';
 
-import 'local_notifications_sevice.dart';
+import 'local_notifications_service.dart';
 
 class WorkManagerService {
   // register one off task
@@ -8,9 +8,7 @@ class WorkManagerService {
     await Workmanager().registerOneOffTask(
       'id1',
       'show simple notification',
-
     );
-
   }
 
   // register periodic task
@@ -18,16 +16,13 @@ class WorkManagerService {
     await Workmanager().registerPeriodicTask(
       'id1',
       'show simple notification',
-      frequency: const Duration(minutes: 15), // اقل حاجة 15 دقيقة
-
+      frequency: const Duration(days: 1), // اقل حاجة 15 دقيقة
     );
-
   }
-
 
   Future<void> init() async {
     Workmanager().initialize(actionTask, isInDebugMode: true);
-    registerMyTask();
+    registerMyTaskPeriodically();
   }
 
   void cancelTask(String id) {
@@ -38,7 +33,7 @@ class WorkManagerService {
 @pragma('vm:entry-point')
 void actionTask() {
   Workmanager().executeTask((task, inputData) async {
-     LocalNotificationsService.showBasicNotification();
+    LocalNotificationsService.showDailyNotification();
     return Future.value(true);
   });
 }
