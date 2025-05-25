@@ -73,7 +73,27 @@ class LocalNotificationsService {
   // إشعار متكرر كل دقيقة
   // يجدول إشعار يظهر كل دقيقة.
   // يستخدم matchDateTimeComponents: DateTimeComponents.time لتكرار الوقت.
-  static Future<void> showRepeatedNotification() async {
+  static void showRepeatedNotification() async {
+    const AndroidNotificationDetails android = AndroidNotificationDetails(
+      'id 2',
+      'repeated notification',
+      importance: Importance.max,
+      priority: Priority.high,
+    );
+    NotificationDetails details = const NotificationDetails(android: android);
+    await flutterLocalNotificationsPlugin.periodicallyShow(
+      1,
+      'Reapated Notification',
+      'body',
+      RepeatInterval.daily,
+      details,
+      payload: "Payload Data",
+
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+    );
+  }
+
+  static Future<void> showRepeated2Notification() async {
     tz.initializeTimeZones();
 
     final now = tz.TZDateTime.now(tz.local);
